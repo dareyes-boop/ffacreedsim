@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>California FFA Creed Recitation & Q&A Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ffa: {
+                            navy: '#003366',
+                            navyDark: '#001F3F',
+                            navyLight: '#0A4A8A',
+                            gold: '#FFCC00',
+                            goldHover: '#E6B800',
+                            goldLight: '#FFF9DB',
+                            slate: '#F4F6F9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F4F6F9;
+            color: #1E293B;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animated audio equalizer bars for Judge Speaking State */
+        .waveform-bar {
+            width: 4px;
+            border-radius: 9999px;
+            background-color: #FFCC00;
+            animation: wavePulse 0.9s ease-in-out infinite;
+        }
+        .waveform-bar:nth-child(1) { height: 12px; animation-delay: 0.0s; }
+        .waveform-bar:nth-child(2) { height: 24px; animation-delay: 0.15s; }
+        .waveform-bar:nth-child(3) { height: 32px; animation-delay: 0.3s; }
+        .waveform-bar:nth-child(4) { height: 20px; animation-delay: 0.45s; }
+        .waveform-bar:nth-child(5) { height: 28px; animation-delay: 0.6s; }
+        .waveform-bar:nth-child(6) { height: 14px; animation-delay: 0.75s; }
+
+        @keyframes wavePulse {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1.2); }
+        }
+
+        /* Pulsing microphone ring when listening */
+        .mic-pulse-ring {
+            animation: micRipple 1.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+        }
+
+        @keyframes micRipple {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            70% { transform: scale(1.35); opacity: 0; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #E2E8F0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ========================================================================= -->
+    <!-- OFFICIAL CALIFORNIA FFA HEADER                                            -->
+    <!-- ========================================================================= -->
+    <header class="bg-ffa-navy text-white shadow-lg border-b-4 border-ffa-gold sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3.5">
+                <!-- FFA Emblem Badge -->
+                <div class="w-11 h-11 rounded-xl bg-ffa-gold flex items-center justify-center text-ffa-navy shadow-md shrink-0">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2L14.8 8.5L22 9.2L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.2L9.2 8.5L12 2Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold uppercase tracking-wider bg-ffa-gold/20 text-ffa-gold px-2 py-0.5 rounded border border-ffa-gold/40">Greenhand LDE (Grades 7–9)</span>
+                        <span class="hidden sm:inline text-xs text-blue-200">California Association FFA</span>
+                    </div>
+                    <h1 class="font-display text-lg sm:text-xl font-extrabold tracking-tight text-white">
+                        FFA Creed Recitation & Q&A Simulator
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Right Controls: Study Bank, Live Timer & Reset -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <button onclick="openQuestionBankModal()" class="text-xs sm:text-sm bg-ffa-gold/15 hover:bg-ffa-gold/25 text-ffa-gold border border-ffa-gold/40 font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span class="hidden md:inline">30 Creed Questions</span>
+                    <span class="md:hidden">Q-Bank</span>
+                </button>
+
+                <div id="header-timer-badge" class="hidden items-center gap-2 bg-ffa-navyDark px-3.5 py-1.5 rounded-lg border border-blue-700/60">
+                    <i class="fa-regular fa-clock text-ffa-gold"></i>
+                    <span id="header-timer-label" class="text-xs text-blue-200 font-medium">Question Time:</span>
+                    <span id="header-countdown" class="font-mono font-bold text-sm text-white">5:00</span>
+                </div>
+
+                <button onclick="confirmReturnToSetup()" id="btn-header-reset" class="hidden text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="hidden sm:inline">Restart</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Non-blocking Toast Banner -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-full px-4 pointer-events-none no-print"></div>
+
+    <!-- Confirmation Modal (Replaces native confirm/alert) -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+            <div class="flex items-center gap-3 text-ffa-navy mb-3">
+                <div class="w-10 h-10 rounded-full bg-ffa-goldLight text-ffa-navy flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <h3 id="modal-title" class="font-display font-bold text-lg">Confirm Action</h3>
+            </div>
+            <p id="modal-message" class="text-slate-600 text-sm leading-relaxed mb-6">Are you sure you want to proceed?</p>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeCustomModal()" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                    Cancel
+                </button>
+                <button id="modal-confirm-btn" class="px-5 py-2.5 rounded-xl text-sm font-bold text-ffa-navy bg-ffa-gold hover:bg-ffa-goldHover shadow-sm transition">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: 30 OFFICIAL CREED QUESTIONS STUDY BANK (ORGANIZED BY PARAGRAPH)    -->
+    <!-- ========================================================================= -->
+    <div id="qbank-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[88vh] flex flex-col border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-ffa-navy text-white px-6 py-4 flex items-center justify-between border-b-4 border-ffa-gold">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-ffa-gold">California & National FFA Study Bank</span>
+                    <h3 class="font-display font-extrabold text-lg sm:text-xl">30 Official Single-Part Creed Questions</h3>
+                </div>
+                <button onclick="closeQuestionBankModal()" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="bg-slate-100 px-6 py-3 border-b border-slate-200 flex flex-wrap items-center gap-2">
+                <button onclick="filterQuestionBank('all')" id="qbank-tab-all" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-ffa-navy text-white transition">All 30 Questions</button>
+                <button onclick="filterQuestionBank(1)" id="qbank-tab-1" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition">Paragraph 1</button>
+                <button onclick="filterQuestionBank(2)" id="qbank-tab-2" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition">Paragraph 2</button>
+                <button onclick="filterQuestionBank(3)" id="qbank-tab-3" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition">Paragraph 3</button>
+                <button onclick="filterQuestionBank(4)" id="qbank-tab-4" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition">Paragraph 4</button>
+                <button onclick="filterQuestionBank(5)" id="qbank-tab-5" class="qbank-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-200 transition">Paragraph 5</button>
+            </div>
+
+            <!-- Question List Body -->
+            <div id="qbank-list-container" class="p-6 overflow-y-auto space-y-4 flex-grow">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+                <span><strong>CA FFA Rule:</strong> Each participant is asked 3 single-part questions per round within a 5-minute time limit.</span>
+                <button onclick="closeQuestionBankModal()" class="px-4 py-2 rounded-xl bg-ffa-navy text-white font-bold hover:bg-ffa-navyLight transition">Close Study Bank</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MAIN CONTENT CONTAINER                                                    -->
+    <!-- ========================================================================= -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- ===================================================================== -->
+        <!-- STAGE 1: SETUP & PRACTICE MODE SELECTOR                               -->
+        <!-- ===================================================================== -->
+        <section id="screen-setup" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-ffa-navy to-ffa-navyLight rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-ffa-gold text-ffa-navy px-3 py-1 rounded-full mb-3">
+                        <i class="fa-solid fa-microphone-lines"></i> Official California FFA Creed Speaking LDE
+                    </span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold mb-2">
+                        Master the FFA Creed & Judges' Q&A Round
+                    </h2>
+                    <p class="text-blue-100 text-sm sm:text-base leading-relaxed">
+                        Practice reciting E.M. Tiffany's 5-paragraph Creed from memory with live word-for-word accuracy checking (<strong>-2 pts per missed, added, or switched word</strong>), a built-in <strong>10-second judge prompter</strong>, and a <strong>5-minute, 3-question panel round</strong> scored on the official 100-point California FFA rubric.
+                    </p>
+                </div>
+                <div class="hidden lg:block absolute right-8 bottom-0 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-scroll text-[150px]"></i>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: Contestant Config & Audio Controls (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- Step 1: Contestant Info & Mode Selection -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+                            <span class="w-7 h-7 rounded-lg bg-ffa-navy text-white font-bold text-sm flex items-center justify-center">1</span>
+                            <h3 class="font-display font-bold text-lg text-ffa-navy">Contestant & Practice Mode</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <!-- Student Name & Chapter -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="student-name" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                        Contestant Name <span class="text-slate-400 font-normal">(Optional)</span>
+                                    </label>
+                                    <input type="text" id="student-name" placeholder="e.g., Maya Hernandez"
+                                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-ffa-navy focus:border-ffa-navy text-sm transition">
+                                </div>
+                                <div>
+                                    <label for="student-chapter" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                        FFA Chapter / Grade <span class="text-slate-400 font-normal">(Optional)</span>
+                                    </label>
+                                    <input type="text" id="student-chapter" placeholder="e.g., Hanford FFA (9th Grade)"
+                                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-ffa-navy focus:border-ffa-navy text-sm transition">
+                                </div>
+                            </div>
+
+                            <!-- 3 Practice Modes -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                    Select Practice Simulation Mode
+                                </label>
+                                <div class="space-y-3">
+                                    <!-- Mode 1: Full Contest -->
+                                    <label class="cursor-pointer block">
+                                        <input type="radio" name="practice-mode" value="full" checked class="peer sr-only">
+                                        <div class="p-4 rounded-xl border-2 border-slate-200 peer-checked:border-ffa-navy peer-checked:bg-blue-50/60 hover:border-slate-300 transition">
+                                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                <span class="font-display font-bold text-sm sm:text-base text-ffa-navy flex items-center gap-2">
+                                                    <i class="fa-solid fa-trophy text-ffa-gold"></i> 1. Full Contest Simulation (Recitation + 3 Questions)
+                                                </span>
+                                                <span class="text-xs font-extrabold bg-ffa-gold text-ffa-navy px-2.5 py-0.5 rounded-full">Official Format</span>
+                                            </div>
+                                            <p class="text-xs text-slate-600">
+                                                Recite the complete FFA Creed from memory, then answer 3 judges' questions within the 5-minute clock for a full 100-point evaluation.
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                    <!-- Mode 2: Recitation Only -->
+                                    <label class="cursor-pointer block">
+                                        <input type="radio" name="practice-mode" value="recitation_only" class="peer sr-only">
+                                        <div class="p-4 rounded-xl border-2 border-slate-200 peer-checked:border-ffa-navy peer-checked:bg-blue-50/60 hover:border-slate-300 transition">
+                                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                <span class="font-display font-bold text-sm sm:text-base text-ffa-navy flex items-center gap-2">
+                                                    <i class="fa-solid fa-spell-check text-blue-600"></i> 2. Recitation Accuracy Drill Only
+                                                </span>
+                                                <span class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full">Memory & Word Check</span>
+                                            </div>
+                                            <p class="text-xs text-slate-600">
+                                                Focus strictly on reciting the Creed word-for-word with the 10-second prompter rule and immediate accuracy deduction audit (-2 pts/error).
+                                            </p>
+                                        </div>
+                                    </label>
+
+                                    <!-- Mode 3: Q&A Only -->
+                                    <label class="cursor-pointer block">
+                                        <input type="radio" name="practice-mode" value="qa_only" class="peer sr-only">
+                                        <div class="p-4 rounded-xl border-2 border-slate-200 peer-checked:border-ffa-navy peer-checked:bg-blue-50/60 hover:border-slate-300 transition">
+                                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                <span class="font-display font-bold text-sm sm:text-base text-ffa-navy flex items-center gap-2">
+                                                    <i class="fa-solid fa-comments text-emerald-600"></i> 3. 3-Question Judges' Q&A Round Only
+                                                </span>
+                                                <span class="text-xs font-bold bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full">5-Min Timer • 40 Pts</span>
+                                            </div>
+                                            <p class="text-xs text-slate-600">
+                                                Skip the recitation and jump straight into answering 3 single-part judges' questions with AI rubric grading and model Greenhand answers.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Question Source Selector -->
+                            <div>
+                                <label for="question-source-select" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                    Judges' Question Source
+                                </label>
+                                <select id="question-source-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-ffa-navy text-sm font-medium text-slate-800">
+                                    <option value="bank">Curated 30-Question CA/National FFA Creed Bank (Recommended)</option>
+                                    <option value="ai">Fresh AI-Generated Single-Part Creed Questions</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Voice & Accessibility Settings -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+                            <span class="w-7 h-7 rounded-lg bg-ffa-navy text-white font-bold text-sm flex items-center justify-center">2</span>
+                            <h3 class="font-display font-bold text-lg text-ffa-navy">Voice, Prompter & Classroom Settings</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <!-- Judge Voice Toggle -->
+                            <div class="flex items-start justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="pr-3">
+                                    <div class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-volume-high text-ffa-navy"></i> Judge & Prompter Voice
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">Judges speak questions and 10-second prompts aloud.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer mt-1">
+                                    <input type="checkbox" id="toggle-tts" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ffa-navy"></div>
+                                </label>
+                            </div>
+
+                            <!-- Microphone STT Toggle -->
+                            <div class="flex items-start justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                                <div class="pr-3">
+                                    <div class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-microphone text-ffa-navy"></i> Speech-to-Text Mic
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">Live transcription for recitation & Q&A answers.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer mt-1">
+                                    <input type="checkbox" id="toggle-stt" checked class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ffa-navy"></div>
+                                </label>
+                            </div>
+
+                            <!-- Auto-Listen in Q&A -->
+                            <div class="flex items-start justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 sm:col-span-2">
+                                <div class="pr-3">
+                                    <div class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bolt text-amber-500"></i> Hands-Free Auto-Listen in Q&A
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">Automatically turn on your microphone right after each judge finishes asking their question.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer mt-1">
+                                    <input type="checkbox" id="toggle-autolisten" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ffa-navy"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="text-xs text-slate-700">
+                                <strong class="text-ffa-navy"><i class="fa-solid fa-circle-info mr-1"></i> Mic Tip:</strong>
+                                Click <strong>Allow</strong> when prompted for microphone access. You can also type or edit transcripts in noisy ag classrooms.
+                            </div>
+                            <button type="button" onclick="testMicrophonePermission()" id="btn-test-mic" class="shrink-0 text-xs font-bold bg-white hover:bg-slate-100 text-ffa-navy border border-slate-300 px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-ear-listen"></i> Test Mic
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Official California FFA Creed Speaker Script & Rules Card (5 cols) -->
+                <div class="lg:col-span-5 flex flex-col justify-between space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex-grow flex flex-col">
+                        <div class="flex items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-100">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-ffa-navy bg-ffa-goldLight px-2.5 py-1 rounded-md border border-ffa-gold/50">
+                                Official Speaker Script
+                            </span>
+                            <span class="text-xs font-semibold text-slate-500">E.M. Tiffany (1930 / Rev. 63rd Conv.)</span>
+                        </div>
+
+                        <!-- Mandatory Opening/Closing Rule Alert -->
+                        <div class="bg-amber-50 border-l-4 border-ffa-gold p-3 rounded-r-xl mb-4 text-xs text-amber-950 space-y-1">
+                            <div class="font-bold text-ffa-navy"><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i> Exact Opening & Closing Rule:</div>
+                            <p>Begin with: <strong>“The FFA Creed by E.M. Tiffany”</strong></p>
+                            <p>End with: <strong>“...that inspiring task. Thank you”</strong></p>
+                            <p class="text-[11px] text-amber-800">Any extra intro/closing remarks or missed/added/switched words incur a <strong>-2 point deduction per word</strong>.</p>
+                        </div>
+
+                        <!-- Official 5-Paragraph Script Preview -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs text-slate-700 leading-relaxed space-y-2.5 overflow-y-auto max-h-[340px] font-serif">
+                            <p class="font-bold text-center text-ffa-navy font-sans">“The FFA Creed by E.M. Tiffany</p>
+                            <p>I believe in the future of agriculture, with a faith born not of words but of deeds – achievements won by the present and past generations of agriculturists; in the promise of better days through better ways, even as the better things we now enjoy have come to us from the struggles of former years.</p>
+                            <p>I believe that to live and work on a good farm, or to be engaged in other agricultural pursuits, is pleasant as well as challenging; for I know the joys and discomforts of agricultural life and hold an inborn fondness for those associations which, even in hours of discouragement, I cannot deny.</p>
+                            <p>I believe in leadership from ourselves and respect from others. I believe in my own ability to work efficiently and think clearly, with such knowledge and skill as I can secure, and in the ability of progressive agriculturists to serve our own and the public interest in producing and marketing the product of our toil.</p>
+                            <p>I believe in less dependence on begging and more power in bargaining; in the life abundant and enough honest wealth to help make it so – for others as well as myself; in less need for charity and more of it when needed; in being happy myself and playing square with those whose happiness depends upon me.</p>
+                            <p>I believe that American agriculture can and will hold true to the best traditions of our national life and that I can exert an influence in my home and community which will stand solid for my part in that inspiring task.</p>
+                            <p class="font-bold text-center text-ffa-navy font-sans">Thank you”</p>
+                        </div>
+                    </div>
+
+                    <!-- Primary Start CTA Button -->
+                    <button onclick="startCreedSimulation()" id="btn-start-sim"
+                        class="w-full py-4 px-6 rounded-2xl bg-ffa-gold hover:bg-ffa-goldHover text-ffa-navy font-display font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-play text-lg"></i>
+                        <span>Begin Creed Simulation</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- STAGE 2A: CREED RECITATION STAGE (MEMORY + 10-SEC PROMPTER)           -->
+        <!-- ===================================================================== -->
+        <section id="screen-recitation" class="hidden space-y-6">
+            <!-- Top Status & 10-Second Prompter Strip -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-ffa-navy text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                        Part 1: Creed Recitation
+                    </span>
+                    <span class="text-xs font-semibold bg-ffa-goldLight text-ffa-navy border border-ffa-gold/50 px-2.5 py-1 rounded-md">
+                        -2 pts per word error
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+                        Recitation Time: <span id="recitation-elapsed" class="font-mono font-bold text-ffa-navy">0:00</span>
+                    </div>
+                    <div class="text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+                        Prompts Used: <span id="prompts-used-count" class="font-mono font-bold text-rose-600">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recitation Stage Card -->
+            <div class="bg-gradient-to-b from-ffa-navyDark to-ffa-navy rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-blue-900 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-ffa-gold">Official Contest Stage</span>
+                        <h2 class="font-display text-xl sm:text-2xl font-extrabold mt-0.5">
+                            Recite the FFA Creed From Memory
+                        </h2>
+                        <p class="text-xs sm:text-sm text-blue-200 mt-1">
+                            Remember: Start with <strong>“The FFA Creed by E.M. Tiffany”</strong> and end with <strong>“...that inspiring task. Thank you”</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Official 10-Second Prompter Controls -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button type="button" onclick="toggleScriptPeek()" id="btn-peek-script"
+                            class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/25 px-3.5 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>Peek at Script (Practice Aid)</span>
+                        </button>
+
+                        <button type="button" onclick="triggerJudgePrompt()" id="btn-request-prompt"
+                            class="text-xs font-bold bg-ffa-gold hover:bg-ffa-goldHover text-ffa-navy px-3.5 py-2.5 rounded-xl shadow-md transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-life-ring"></i>
+                            <span>Judge Prompt (Next 4 Words)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 10-Second Falter Warning Alert (Triggers automatically if student pauses 10s while recording) -->
+                <div id="falter-alert-banner" class="hidden bg-amber-500/20 border-2 border-ffa-gold rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-hourglass-half text-ffa-gold text-xl animate-pulse"></i>
+                        <div class="text-xs sm:text-sm">
+                            <strong class="text-ffa-gold">10-Second Hesitation Detected (Official Prompter Rule):</strong>
+                            <span class="text-blue-100 block sm:inline"> In competition, the designated judge prompter assists if you falter for 10 seconds.</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="triggerJudgePrompt()" class="shrink-0 text-xs font-extrabold bg-ffa-gold text-ffa-navy px-3.5 py-2 rounded-lg">
+                        Hear Next Line
+                    </button>
+                </div>
+
+                <!-- Active Prompter Hint Box -->
+                <div id="prompter-hint-box" class="hidden bg-white text-slate-900 rounded-xl p-4 border-l-4 border-ffa-gold shadow-md">
+                    <div class="text-xs font-extrabold uppercase tracking-wider text-ffa-navy mb-1">
+                        <i class="fa-solid fa-bullhorn text-ffa-gold mr-1"></i> Designated Judge Prompter Cue:
+                    </div>
+                    <p id="prompter-hint-text" class="font-display font-bold text-base text-slate-900"></p>
+                </div>
+
+                <!-- Optional Hidden Script Peek Drawer -->
+                <div id="script-peek-drawer" class="hidden bg-white/95 text-slate-800 rounded-xl p-5 text-xs sm:text-sm leading-relaxed space-y-2.5 font-serif border border-ffa-gold">
+                    <div class="flex items-center justify-between font-sans text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-lg mb-2">
+                        <span><i class="fa-solid fa-eye mr-1"></i> Practice Mode Script Visible (In actual competition, no manuscript is permitted)</span>
+                        <button type="button" onclick="toggleScriptPeek()" class="underline">Hide</button>
+                    </div>
+                    <p class="font-bold text-center font-sans text-ffa-navy">“The FFA Creed by E.M. Tiffany</p>
+                    <p>I believe in the future of agriculture, with a faith born not of words but of deeds – achievements won by the present and past generations of agriculturists; in the promise of better days through better ways, even as the better things we now enjoy have come to us from the struggles of former years.</p>
+                    <p>I believe that to live and work on a good farm, or to be engaged in other agricultural pursuits, is pleasant as well as challenging; for I know the joys and discomforts of agricultural life and hold an inborn fondness for those associations which, even in hours of discouragement, I cannot deny.</p>
+                    <p>I believe in leadership from ourselves and respect from others. I believe in my own ability to work efficiently and think clearly, with such knowledge and skill as I can secure, and in the ability of progressive agriculturists to serve our own and the public interest in producing and marketing the product of our toil.</p>
+                    <p>I believe in less dependence on begging and more power in bargaining; in the life abundant and enough honest wealth to help make it so – for others as well as myself; in less need for charity and more of it when needed; in being happy myself and playing square with those whose happiness depends upon me.</p>
+                    <p>I believe that American agriculture can and will hold true to the best traditions of our national life and that I can exert an influence in my home and community which will stand solid for my part in that inspiring task.</p>
+                    <p class="font-bold text-center font-sans text-ffa-navy">Thank you”</p>
+                </div>
+            </div>
+
+            <!-- Recitation Voice Capture Box -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-display font-bold text-base sm:text-lg text-ffa-navy">Recitation Microphone & Live Transcript</h3>
+                        <p class="text-xs text-slate-500">Click "Start Reciting Creed" and speak clearly with upbeat, impassioned tone and steady pace.</p>
+                    </div>
+
+                    <div class="relative inline-flex items-center justify-center">
+                        <span id="recite-pulse-ring" class="hidden absolute inset-0 rounded-xl bg-rose-500 mic-pulse-ring"></span>
+                        <button onclick="toggleSpeechRecognition('recitation')" id="btn-recite-mic"
+                            class="relative z-10 px-5 py-3 rounded-xl font-bold text-sm text-white bg-ffa-navy hover:bg-ffa-navyLight shadow-md transition flex items-center gap-2.5">
+                            <i id="recite-mic-icon" class="fa-solid fa-microphone text-base"></i>
+                            <span id="recite-mic-text">Start Reciting Creed</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Recording Strip -->
+                <div id="recite-status-bar" class="hidden items-center justify-between bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2.5 rounded-xl text-xs font-semibold">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
+                        <span>Accuracy Judges Listening... Speak clearly at an engaging pace.</span>
+                    </div>
+                    <span id="recite-interim-badge" class="italic text-rose-600 truncate max-w-xs"></span>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="recitation-transcript" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Captured Recitation Words <span class="font-normal lowercase text-slate-400">(Official script is ~332 words)</span>
+                        </label>
+                        <div class="flex items-center gap-3 text-xs text-slate-500">
+                            <span>Words Captured: <strong id="recite-word-count" class="text-slate-800">0</strong></span>
+                            <button type="button" onclick="clearRecitationTranscript()" class="text-slate-400 hover:text-rose-600 underline">Clear</button>
+                        </div>
+                    </div>
+                    <textarea id="recitation-transcript" rows="7" oninput="updateRecitationWordCount()"
+                        placeholder="Begin by saying: 'The FFA Creed by E.M. Tiffany. I believe in the future of agriculture...' (You can also paste or type your recitation here to test accuracy grading)."
+                        class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-ffa-navy focus:border-ffa-navy text-sm sm:text-base text-slate-800 leading-relaxed transition"></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-scale-balanced text-ffa-navy"></i>
+                        <span>Accuracy Judge checks every word against the official California FFA Speaker Script.</span>
+                    </div>
+
+                    <button onclick="completeRecitationStage()" id="btn-finish-recitation"
+                        class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-ffa-gold hover:bg-ffa-goldHover text-ffa-navy font-display font-extrabold text-sm sm:text-base shadow-md transition flex items-center justify-center gap-2">
+                        <span id="finish-recite-label">Complete Recitation & Begin 3 Judges' Questions</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- STAGE 2B: 3-JUDGE QUESTION & ANSWER STAGE (5-MINUTE OFFICIAL CLOCK)   -->
+        <!-- ===================================================================== -->
+        <section id="screen-qa" class="hidden space-y-6">
+            <!-- Top Progress & 5-Minute Question Time Bar -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-ffa-navy text-white text-xs font-bold px-3 py-1.5 rounded-lg">
+                        Question <span id="qa-current-num">1</span> of 3
+                    </span>
+                    <span id="qa-paragraph-badge" class="text-xs font-semibold bg-ffa-goldLight text-ffa-navy border border-ffa-gold/50 px-2.5 py-1 rounded-md">
+                        Paragraph 1 Focus
+                    </span>
+                </div>
+
+                <div class="flex-grow max-w-md hidden md:block">
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                        <div id="qa-progress-bar" class="bg-ffa-navy h-2.5 rounded-full transition-all duration-500" style="width: 33.3%"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
+                        Answer Time: <span id="qa-question-elapsed" class="font-mono font-bold text-ffa-navy">0:00</span>
+                    </div>
+                    <button onclick="confirmEndQAEarly()" class="text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-lg transition">
+                        Finish & Score
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3-Judge Panel Stage -->
+            <div class="bg-gradient-to-b from-ffa-navyDark to-ffa-navy rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-blue-900">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-ffa-gold">California FFA Creed Judging Panel</span>
+                        <h2 class="text-sm sm:text-base text-blue-100 font-medium mt-0.5">
+                            3 Single-Part Questions • 5:00 Official Time Limit (-1 pt/sec over)
+                        </h2>
+                    </div>
+
+                    <!-- Live Judge Speaking Waveform -->
+                    <div id="judge-speaking-indicator" class="hidden items-center gap-2.5 bg-white/10 border border-ffa-gold/40 px-3.5 py-2 rounded-xl">
+                        <div class="flex items-center gap-1 h-6">
+                            <span class="waveform-bar"></span>
+                            <span class="waveform-bar"></span>
+                            <span class="waveform-bar"></span>
+                            <span class="waveform-bar"></span>
+                            <span class="waveform-bar"></span>
+                            <span class="waveform-bar"></span>
+                        </div>
+                        <span class="text-xs font-bold text-ffa-gold uppercase tracking-wider">Judge Speaking...</span>
+                    </div>
+                </div>
+
+                <!-- 3 Judges Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div id="judge-card-0" class="judge-card bg-white/10 border-2 border-transparent rounded-xl p-4 flex items-center gap-3.5 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-full bg-blue-800 border-2 border-ffa-gold/60 flex items-center justify-center text-ffa-gold font-display font-bold text-lg shrink-0">J1</div>
+                        <div class="min-w-0">
+                            <div class="text-xs text-ffa-gold font-semibold">Judge 1</div>
+                            <div class="font-bold text-sm text-white truncate">Mr. Caleb Henderson</div>
+                            <div class="text-xs text-blue-200 truncate">CA Agriculture Educator</div>
+                        </div>
+                    </div>
+
+                    <div id="judge-card-1" class="judge-card bg-white/10 border-2 border-transparent rounded-xl p-4 flex items-center gap-3.5 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-full bg-blue-800 border-2 border-blue-400/40 flex items-center justify-center text-blue-200 font-display font-bold text-lg shrink-0">J2</div>
+                        <div class="min-w-0">
+                            <div class="text-xs text-blue-300 font-semibold">Judge 2</div>
+                            <div class="font-bold text-sm text-white truncate">Mrs. Elena Morales</div>
+                            <div class="text-xs text-blue-200 truncate">Agribusiness Leader</div>
+                        </div>
+                    </div>
+
+                    <div id="judge-card-2" class="judge-card bg-white/10 border-2 border-transparent rounded-xl p-4 flex items-center gap-3.5 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-full bg-blue-800 border-2 border-blue-400/40 flex items-center justify-center text-blue-200 font-display font-bold text-lg shrink-0">J3</div>
+                        <div class="min-w-0">
+                            <div class="text-xs text-blue-300 font-semibold">Judge 3</div>
+                            <div class="font-bold text-sm text-white truncate">Jordan Taylor</div>
+                            <div class="text-xs text-blue-200 truncate">Past State FFA Officer</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Question Prompt Box -->
+                <div class="bg-white text-slate-900 rounded-2xl p-5 sm:p-6 shadow-inner">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span id="active-judge-label" class="text-xs font-extrabold uppercase tracking-wider text-ffa-navy flex items-center gap-1.5">
+                            <i class="fa-solid fa-comment-dots text-ffa-gold"></i> Judge 1 Asks:
+                        </span>
+                        <button onclick="replayCurrentQuestion()" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-ffa-navy px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>Replay Question Audio</span>
+                        </button>
+                    </div>
+                    <p id="current-qa-question-text" class="font-display text-lg sm:text-xl font-bold text-slate-900 leading-snug">
+                        Loading question...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Student Q&A Answer Input -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-display font-bold text-base sm:text-lg text-ffa-navy">Your Spoken Answer</h3>
+                        <p class="text-xs text-slate-500">Organize your thoughts clearly, support your point with details, and connect to agriculture/FFA.</p>
+                    </div>
+
+                    <div class="relative inline-flex items-center justify-center">
+                        <span id="qa-pulse-ring" class="hidden absolute inset-0 rounded-xl bg-rose-500 mic-pulse-ring"></span>
+                        <button onclick="toggleSpeechRecognition('qa')" id="btn-qa-mic"
+                            class="relative z-10 px-5 py-3 rounded-xl font-bold text-sm text-white bg-ffa-navy hover:bg-ffa-navyLight shadow-md transition flex items-center gap-2.5">
+                            <i id="qa-mic-icon" class="fa-solid fa-microphone text-base"></i>
+                            <span id="qa-mic-text">Start Speaking Answer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="qa-status-bar" class="hidden items-center justify-between bg-rose-50 border border-rose-200 text-rose-800 px-4 py-2.5 rounded-xl text-xs font-semibold">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
+                        <span>Listening... Speak clearly and avoid filler words ("um", "like").</span>
+                    </div>
+                    <span id="qa-interim-badge" class="italic text-rose-600 truncate max-w-xs"></span>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="qa-answer-transcript" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Live Answer Transcript <span class="font-normal lowercase text-slate-400">(editable)</span>
+                        </label>
+                        <div class="flex items-center gap-3 text-xs text-slate-500">
+                            <span>Words: <strong id="qa-word-count" class="text-slate-800">0</strong></span>
+                            <button type="button" onclick="clearQATranscript()" class="text-slate-400 hover:text-rose-600 underline">Clear</button>
+                        </div>
+                    </div>
+                    <textarea id="qa-answer-transcript" rows="5" oninput="updateQAWordCount()"
+                        placeholder="Click 'Start Speaking Answer' above and share your answer—or type your response directly here..."
+                        class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-ffa-navy focus:border-ffa-navy text-sm sm:text-base text-slate-800 leading-relaxed transition"></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lightbulb text-ffa-gold"></i>
+                        <span>Tip: Reference your Greenhand FFA class, SAE project, or California agriculture.</span>
+                    </div>
+
+                    <button onclick="submitQAAnswerAndNext()" id="btn-submit-qa"
+                        class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-ffa-gold hover:bg-ffa-goldHover text-ffa-navy font-display font-extrabold text-sm sm:text-base shadow-md transition flex items-center justify-center gap-2">
+                        <span id="qa-submit-label">Submit Answer & Next Question</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- STAGE 3A: EVALUATING TRANSITION SCREEN                                -->
+        <!-- ===================================================================== -->
+        <section id="screen-evaluating" class="hidden py-16">
+            <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-lg border border-slate-200 p-8 text-center space-y-5">
+                <div class="w-16 h-16 rounded-2xl bg-ffa-navy text-ffa-gold flex items-center justify-center text-3xl mx-auto shadow-md animate-bounce">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="font-display text-2xl font-extrabold text-ffa-navy">
+                    Tabulating Your 100-Point California FFA Score Sheet...
+                </h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Checking your recitation word-for-word against E.M. Tiffany's official script (<strong>-2 pts per error</strong>) and grading your 3 Q&A responses on the official California FFA Creed Rubric.
+                </p>
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden max-w-sm mx-auto">
+                    <div class="bg-ffa-gold h-2.5 rounded-full animate-pulse w-full"></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- STAGE 3B: OFFICIAL 100-POINT CALIFORNIA FFA SCORECARD & COACHING      -->
+        <!-- ===================================================================== -->
+        <section id="screen-results" class="hidden space-y-6">
+            <!-- Top Net Total Score Banner -->
+            <div class="bg-gradient-to-r from-ffa-navyDark via-ffa-navy to-ffa-navyLight rounded-2xl p-6 sm:p-8 text-white shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div class="space-y-2 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 bg-ffa-gold text-ffa-navy text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">
+                            <i class="fa-solid fa-clipboard-check"></i> Official 100-Point Creed Speaking Rubric
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold">
+                            Contestant Scorecard: <span id="res-student-name" class="text-ffa-gold">FFA Greenhand</span>
+                        </h2>
+                        <p id="res-mode-subtitle" class="text-sm text-blue-100">
+                            California FFA Creed Recitation & Q&A Practice Round
+                        </p>
+                        <p id="res-overall-feedback" class="text-sm text-white/90 pt-2 leading-relaxed border-t border-white/15">
+                            Loading judge consensus feedback...
+                        </p>
+                    </div>
+
+                    <!-- Grand Total & Net Total Score Box -->
+                    <div class="bg-white/10 backdrop-blur-sm border-2 border-ffa-gold rounded-2xl p-5 text-center shrink-0 min-w-[250px]">
+                        <div class="text-xs font-bold uppercase tracking-wider text-ffa-gold mb-1">Net Total Points</div>
+                        <div class="font-display text-5xl font-extrabold text-white">
+                            <span id="res-net-score">--</span><span class="text-2xl text-blue-200 font-semibold">/100</span>
+                        </div>
+                        <div class="mt-2 text-xs text-blue-100 space-y-0.5">
+                            <div>Gross Rubric Points: <strong id="res-gross-score">--</strong>/100</div>
+                            <div class="text-rose-300">Accuracy Deduction: <strong>-<span id="res-accuracy-deduction">0</span> pts</strong> (<span id="res-error-count">0</span> errors)</div>
+                            <div class="text-amber-300">Time Deduction: <strong>-<span id="res-time-deduction">0</span> pts</strong></div>
+                        </div>
+                        <div id="res-tier-badge" class="mt-3 inline-block text-xs font-extrabold px-3 py-1 rounded-full bg-ffa-gold text-ffa-navy">
+                            State Finals Caliber
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Official 3 Rubric Sections (30 + 30 + 40 = 100 Points) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 1. Oral Communication (30 Points) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-ffa-navy bg-blue-50 px-2.5 py-1 rounded">Section 1</span>
+                            <span class="font-display font-extrabold text-xl text-ffa-navy"><span id="res-oral-total">--</span>/30</span>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 mb-3">Oral Communication</h3>
+
+                        <div class="space-y-2.5 text-xs mb-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Pace (0–5 × 2)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-pace-pts">-</span> / 10 pts</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Tone (0–5 × 2)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-tone-pts">-</span> / 10 pts</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Volume (0–5 × 2)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-volume-pts">-</span> / 10 pts</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="res-oral-feedback" class="text-xs sm:text-sm text-slate-700 bg-blue-50/50 p-3.5 rounded-xl border border-blue-100 leading-relaxed">
+                        Evaluating pace, tone, and vocal clarity...
+                    </p>
+                </div>
+
+                <!-- 2. Non-verbal Communication (30 Points - Interactive Self/Coach Assessment) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-ffa-navy bg-amber-50 px-2.5 py-1 rounded">Section 2 (Self/Coach Check)</span>
+                            <span class="font-display font-extrabold text-xl text-ffa-navy"><span id="res-nonverbal-total">24</span>/30</span>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 mb-1">Non-verbal Communication</h3>
+                        <p class="text-[11px] text-slate-500 mb-3">Audio-only mode cannot see video—adjust these sliders with your coach to reflect your physical delivery:</p>
+
+                        <div class="space-y-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 mb-3">
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Eye Contact (90–100% audience)</span>
+                                    <span class="text-ffa-navy font-bold"><span id="nv-eye-val">4</span> × 2 = <span id="nv-eye-pts">8</span>/10</span>
+                                </div>
+                                <input type="range" id="slider-eye" min="0" max="5" value="4" oninput="recalculateNonVerbalScore()" class="w-full accent-ffa-navy cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Mannerisms & Expressive Gestures</span>
+                                    <span class="text-ffa-navy font-bold"><span id="nv-gestures-val">4</span> × 2 = <span id="nv-gestures-pts">8</span>/10</span>
+                                </div>
+                                <input type="range" id="slider-gestures" min="0" max="5" value="4" oninput="recalculateNonVerbalScore()" class="w-full accent-ffa-navy cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Poise, Stance & Official Dress</span>
+                                    <span class="text-ffa-navy font-bold"><span id="nv-poise-val">4</span> × 2 = <span id="nv-poise-pts">8</span>/10</span>
+                                </div>
+                                <input type="range" id="slider-poise" min="0" max="5" value="4" oninput="recalculateNonVerbalScore()" class="w-full accent-ffa-navy cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 bg-amber-50/70 p-3 rounded-xl border border-amber-200/70">
+                        <strong>Contest Tip:</strong> Stand tall with feet shoulder-width apart, avoid swaying, and use purposeful hand gestures on key phrases.
+                    </p>
+                </div>
+
+                <!-- 3. Question and Answer (40 Points) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-ffa-navy bg-emerald-50 px-2.5 py-1 rounded">Section 3</span>
+                            <span class="font-display font-extrabold text-xl text-ffa-navy"><span id="res-qa-total">--</span>/40</span>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-slate-900 mb-3">Question & Answer</h3>
+
+                        <div class="space-y-2.5 text-xs mb-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Response to Questions (0–5 × 2)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-qa-resp-pts">-</span> / 10 pts</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Support & Details (0–5 × 3)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-qa-supp-pts">-</span> / 15 pts</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-semibold text-slate-700">Knowledge of Agriculture (0–5 × 3)</span>
+                                <span class="font-bold text-ffa-navy"><span id="res-qa-know-pts">-</span> / 15 pts</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="res-qa-feedback" class="text-xs sm:text-sm text-slate-700 bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-100 leading-relaxed">
+                        Evaluating Q&A structure, supporting details, and agricultural knowledge...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Recitation Word-for-Word Accuracy Audit Card (Shown when Recitation was completed) -->
+            <div id="recitation-audit-card" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-display font-bold text-xl text-ffa-navy flex items-center gap-2">
+                            <i class="fa-solid fa-spell-check text-ffa-gold"></i>
+                            <span>Official Recitation Accuracy Audit (-2 Points Per Word Error)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Compares your recitation against the exact California FFA Speaker Script (“The FFA Creed by E.M. Tiffany” through “...that inspiring task. Thank you”).
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                        <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg">Exact Match</span>
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-1 rounded-lg line-through">Missed Word (-2)</span>
+                        <span class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg">Added/Switched (-2)</span>
+                    </div>
+                </div>
+
+                <!-- Recitation Stats Strip -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                        <div class="text-xs text-slate-500">Recitation Time</div>
+                        <div id="audit-time" class="font-display font-extrabold text-lg text-ffa-navy">0:00</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                        <div class="text-xs text-slate-500">Speaking Pace</div>
+                        <div id="audit-wpm" class="font-display font-extrabold text-lg text-ffa-navy">0 WPM</div>
+                        <div class="text-[10px] text-slate-400">Ideal: 120–155 WPM</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                        <div class="text-xs text-slate-500">Total Word Errors</div>
+                        <div id="audit-errors" class="font-display font-extrabold text-lg text-rose-600">0</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+                        <div class="text-xs text-slate-500">Accuracy Deduction</div>
+                        <div id="audit-deduction" class="font-display font-extrabold text-lg text-rose-600">-0 pts</div>
+                    </div>
+                </div>
+
+                <!-- Visual Word-by-Word Comparison Output -->
+                <div id="recitation-diff-output" class="bg-slate-50 rounded-xl p-5 border border-slate-200 text-sm leading-loose font-serif">
+                    <!-- Populated via JS diff engine -->
+                </div>
+            </div>
+
+            <!-- Question-by-Question Coaching Breakdown (Shown when Q&A was completed) -->
+            <div id="qa-coaching-card" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-display font-bold text-xl text-ffa-navy">Judges' Question-by-Question Coaching & Model Greenhand Answers</h3>
+                        <p class="text-xs text-slate-500">Review your spoken response, filler word usage, and a state-winning example answer for each question.</p>
+                    </div>
+                    <div class="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">
+                        Total Q&A Time: <strong id="res-qa-total-time" class="text-ffa-navy">0:00</strong> / 5:00
+                    </div>
+                </div>
+
+                <div id="qa-breakdown-list" class="space-y-6">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Bottom Action Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-2 pb-8 no-print">
+                <button onclick="window.print()" class="px-5 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-ffa-navy border border-slate-300 font-display font-bold text-sm shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print / Save Score Sheet</span>
+                </button>
+                <button onclick="startCreedSimulation()" class="px-6 py-3.5 rounded-xl bg-ffa-navy hover:bg-ffa-navyLight text-white font-display font-bold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Practice Again (New Questions)</span>
+                </button>
+                <button onclick="returnToSetupDirect()" class="px-6 py-3.5 rounded-xl bg-ffa-gold hover:bg-ffa-goldHover text-ffa-navy font-display font-extrabold text-sm sm:text-base shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Change Practice Mode</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <div>
+                Aligned with <strong>California Association FFA Creed Speaking LDE</strong> (Official Speaker Script & 100-Point Presentation Rubric).
+            </div>
+            <div>
+                Designed for 7th, 8th, and 9th Grade Greenhand FFA Competitors.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT SIMULATION ENGINE, DIFF ACCURACY JUDGE & GEMINI API            -->
+    <!-- ========================================================================= -->
+    <script>
+        // -------------------------------------------------------------------------
+        // 1. EXACT OFFICIAL CALIFORNIA FFA CREED SPEAKER SCRIPT
+        // -------------------------------------------------------------------------
+        const OFFICIAL_CREED_SCRIPT = `The FFA Creed by E.M. Tiffany I believe in the future of agriculture, with a faith born not of words but of deeds – achievements won by the present and past generations of agriculturists; in the promise of better days through better ways, even as the better things we now enjoy have come to us from the struggles of former years. I believe that to live and work on a good farm, or to be engaged in other agricultural pursuits, is pleasant as well as challenging; for I know the joys and discomforts of agricultural life and hold an inborn fondness for those associations which, even in hours of discouragement, I cannot deny. I believe in leadership from ourselves and respect from others. I believe in my own ability to work efficiently and think clearly, with such knowledge and skill as I can secure, and in the ability of progressive agriculturists to serve our own and the public interest in producing and marketing the product of our toil. I believe in less dependence on begging and more power in bargaining; in the life abundant and enough honest wealth to help make it so – for others as well as myself; in less need for charity and more of it when needed; in being happy myself and playing square with those whose happiness depends upon me. I believe that American agriculture can and will hold true to the best traditions of our national life and that I can exert an influence in my home and community which will stand solid for my part in that inspiring task. Thank you`;
+
+        // -------------------------------------------------------------------------
+        // 2. CURATED 30-QUESTION CALIFORNIA / NATIONAL FFA CREED QUESTION BANK
+        //    (Strictly single-part questions organized by Creed paragraph)
+        // -------------------------------------------------------------------------
+        const CREED_QUESTION_BANK = [
+            // Paragraph 1
+            { id: 1, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "Why do you believe in the future of agriculture?" },
+            { id: 2, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "What does it mean to have a faith born not of words, but of deeds?" },
+            { id: 3, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "What are some significant achievements won by past generations of agriculturists?" },
+            { id: 4, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "How can today's agriculturists achieve better days through better ways?" },
+            { id: 5, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "What are some of the better things we now enjoy that have come to us from the struggles of former years?" },
+            { id: 6, paragraph: 1, theme: "Future of Agriculture & Deeds", question: "Why do you think the first line of the Creed was changed from 'farming' to 'agriculture'?" },
+
+            // Paragraph 2
+            { id: 7, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "What do you believe are the qualities of a good farm?" },
+            { id: 8, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "What are some examples of 'other agricultural pursuits' beyond traditional farming?" },
+            { id: 9, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "What is one of the greatest joys of agricultural life you have experienced or observed?" },
+            { id: 10, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "What are some of the discomforts of agricultural life that agriculturists face today?" },
+            { id: 11, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "What does it mean to hold an inborn fondness for agricultural associations even in hours of discouragement?" },
+            { id: 12, paragraph: 2, theme: "Joys, Discomforts & Pursuits", question: "How can FFA members stay connected to agricultural pursuits if they do not live on a farm?" },
+
+            // Paragraph 3
+            { id: 13, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "How can you as a Greenhand FFA member demonstrate leadership from yourself?" },
+            { id: 14, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "What can an FFA member do to earn respect from others in their school and community?" },
+            { id: 15, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "How are you developing your own ability to work efficiently and think clearly?" },
+            { id: 16, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "What does the term 'progressive agriculturists' mean to you?" },
+            { id: 17, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "How do progressive agriculturists serve both their own interest and the public interest?" },
+            { id: 18, paragraph: 3, theme: "Leadership, Efficiency & Progressive Ag", question: "What is meant by 'producing and marketing the product of our toil'?" },
+
+            // Paragraph 4
+            { id: 19, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "What is the difference between begging and bargaining in agriculture?" },
+            { id: 20, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "How would you describe 'the life abundant' mentioned in the fourth paragraph?" },
+            { id: 21, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "What does 'honest wealth' mean to you in the context of agricultural work?" },
+            { id: 22, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "What is meant by 'less need for charity and more of it when needed'?" },
+            { id: 23, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "How do you practice 'playing square with those whose happiness depends upon you'?" },
+            { id: 24, paragraph: 4, theme: "Bargaining, Honest Wealth & Playing Square", question: "Why is personal happiness important to someone working in the agricultural industry?" },
+
+            // Paragraph 5
+            { id: 25, paragraph: 5, theme: "National Traditions & Community Influence", question: "What are some of the best traditions of our national life that American agriculture upholds?" },
+            { id: 26, paragraph: 5, theme: "National Traditions & Community Influence", question: "How can American agriculture hold true to those traditions while adapting to modern technology?" },
+            { id: 27, paragraph: 5, theme: "National Traditions & Community Influence", question: "What specific influence can you exert in your own home to support agriculture?" },
+            { id: 28, paragraph: 5, theme: "National Traditions & Community Influence", question: "How can you exert a positive influence in your local community as an FFA member?" },
+            { id: 29, paragraph: 5, theme: "National Traditions & Community Influence", question: "What does 'that inspiring task' in the final paragraph mean to you?" },
+            { id: 30, paragraph: 5, theme: "National Traditions & Community Influence", question: "Which line or phrase in the FFA Creed is most meaningful to you personally?" }
+        ];
+
+        // -------------------------------------------------------------------------
+        // 3. APPLICATION STATE
+        // -------------------------------------------------------------------------
+        let appState = {
+            studentName: '',
+            studentChapter: '',
+            practiceMode: 'full', // 'full', 'recitation_only', 'qa_only'
+            questionSource: 'bank', // 'bank', 'ai'
+            ttsEnabled: true,
+            sttEnabled: true,
+            autoListen: false,
+
+            // Recitation tracking
+            recitationTranscript: '',
+            recitationSeconds: 0,
+            promptsUsed: 0,
+            recitationTimerInterval: null,
+            falterTimeout: null,
+            recitationAccuracyResult: null,
+
+            // Q&A tracking
+            qaQuestions: [], // 3 questions
+            currentQAIndex: 0,
+            qaResponses: [],
+            qaSecondsRemaining: 300, // Official 5 minutes = 300 seconds
+            qaOvertimeSeconds: 0,
+            qaCurrentElapsed: 0,
+            qaContestTimerInterval: null,
+            qaQuestionTimerInterval: null,
+
+            // Speech & Audio
+            isListening: false,
+            activeMicTarget: null, // 'recitation' or 'qa'
+            recognition: null,
+            finalTranscriptBuffer: '',
+            currentAudioElement: null,
+
+            // Scores for live non-verbal slider recalculation
+            baseScores: {
+                oralTotal: 0,
+                qaTotal: 0,
+                accuracyDeduction: 0,
+                timeDeduction: 0
+            }
+        };
+
+        // -------------------------------------------------------------------------
+        // 4. INITIALIZATION & UI HELPERS
+        // -------------------------------------------------------------------------
+        window.onload = function () {
+            initSpeechRecognition();
+            renderQuestionBankList('all');
+        };
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                info: 'bg-ffa-navy text-white border-ffa-gold',
+                success: 'bg-emerald-800 text-white border-emerald-400',
+                warning: 'bg-amber-800 text-white border-amber-400',
+                error: 'bg-rose-800 text-white border-rose-400'
+            };
+            const icons = {
+                info: 'fa-circle-info text-ffa-gold',
+                success: 'fa-circle-check text-emerald-300',
+                warning: 'fa-triangle-exclamation text-amber-300',
+                error: 'fa-circle-exclamation text-rose-300'
+            };
+
+            toast.className = `pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-xl shadow-xl border-l-4 text-xs sm:text-sm ${colors[type] || colors.info} transition-all duration-300`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.info} mt-0.5 text-base"></i>
+                <div class="flex-1 leading-snug">${message}</div>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        function openCustomModal(title, message, onConfirmCallback) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                closeCustomModal();
+                onConfirmCallback();
+            };
+            const modal = document.getElementById('custom-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCustomModal() {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Question Bank Study Modal
+        function openQuestionBankModal() {
+            const modal = document.getElementById('qbank-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeQuestionBankModal() {
+            const modal = document.getElementById('qbank-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function filterQuestionBank(paraFilter) {
+            document.querySelectorAll('.qbank-tab').forEach(btn => {
+                btn.classList.remove('bg-ffa-navy', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            const activeTab = document.getElementById(`qbank-tab-${paraFilter}`);
+            if (activeTab) {
+                activeTab.classList.remove('bg-white', 'text-slate-700');
+                activeTab.classList.add('bg-ffa-navy', 'text-white');
+            }
+            renderQuestionBankList(paraFilter);
+        }
+
+        function renderQuestionBankList(paraFilter) {
+            const container = document.getElementById('qbank-list-container');
+            const filtered = paraFilter === 'all'
+                ? CREED_QUESTION_BANK
+                : CREED_QUESTION_BANK.filter(q => q.paragraph === paraFilter);
+
+            container.innerHTML = filtered.map(item => `
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/90 flex items-start justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-extrabold bg-ffa-navy text-white px-2 py-0.5 rounded">#${item.id}</span>
+                            <span class="text-xs font-bold text-amber-800 bg-ffa-goldLight border border-ffa-gold/50 px-2 py-0.5 rounded">Paragraph ${item.paragraph}: ${item.theme}</span>
+                        </div>
+                        <p class="font-display font-bold text-sm sm:text-base text-slate-900">${item.question}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchScreen(targetId) {
+            ['screen-setup', 'screen-recitation', 'screen-qa', 'screen-evaluating', 'screen-results'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(targetId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // -------------------------------------------------------------------------
+        // 5. SPEECH-TO-TEXT (WEB SPEECH API) & 10-SECOND FALTER MONITOR
+        // -------------------------------------------------------------------------
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                appState.isListening = true;
+                updateMicVisualState(true);
+                if (appState.activeMicTarget === 'recitation') {
+                    reset10SecondFalterTimer();
+                }
+            };
+
+            recognition.onresult = (event) => {
+                if (appState.activeMicTarget === 'recitation') {
+                    reset10SecondFalterTimer();
+                }
+
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const piece = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        appState.finalTranscriptBuffer += (appState.finalTranscriptBuffer ? ' ' : '') + piece.trim();
+                    } else {
+                        interimTranscript += piece;
+                    }
+                }
+
+                const combined = (appState.finalTranscriptBuffer + (interimTranscript ? ' ' + interimTranscript : '')).trim();
+
+                if (appState.activeMicTarget === 'recitation') {
+                    document.getElementById('recitation-transcript').value = combined;
+                    document.getElementById('recite-interim-badge').textContent = interimTranscript ? `"${interimTranscript}"` : '';
+                    updateRecitationWordCount();
+                } else if (appState.activeMicTarget === 'qa') {
+                    document.getElementById('qa-answer-transcript').value = combined;
+                    document.getElementById('qa-interim-badge').textContent = interimTranscript ? `"${interimTranscript}"` : '';
+                    updateQAWordCount();
+                }
+            };
+
+            recognition.onerror = (event) => {
+                if (event.error === 'not-allowed') {
+                    showToast("Microphone permission denied. Please allow microphone access in your browser, or type your text.", "warning");
+                    stopSpeechRecognition();
+                }
+            };
+
+            recognition.onend = () => {
+                if (appState.isListening) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        appState.isListening = false;
+                        updateMicVisualState(false);
+                    }
+                } else {
+                    updateMicVisualState(false);
+                }
+            };
+
+            appState.recognition = recognition;
+        }
+
+        async function testMicrophonePermission() {
+            const btn = document.getElementById('btn-test-mic');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(t => t.stop());
+                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> Mic Ready!';
+                btn.classList.add('border-emerald-400', 'bg-emerald-50');
+                showToast("Microphone verified and ready!", "success");
+            } catch (err) {
+                btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Mic Blocked';
+                showToast("Microphone blocked or unavailable. You can still type/paste responses.", "warning");
+            }
+        }
+
+        function toggleSpeechRecognition(target) {
+            if (appState.isListening) {
+                stopSpeechRecognition();
+            } else {
+                startSpeechRecognition(target);
+            }
+        }
+
+        function startSpeechRecognition(target) {
+            if (!appState.sttEnabled) {
+                showToast("Speech-to-Text is toggled off in settings.", "info");
+                return;
+            }
+            if (!appState.recognition) {
+                showToast("Speech dictation isn't supported in this browser. Please type your response.", "warning");
+                return;
+            }
+
+            stopAllJudgeAudio();
+            appState.activeMicTarget = target;
+
+            const boxId = target === 'recitation' ? 'recitation-transcript' : 'qa-answer-transcript';
+            appState.finalTranscriptBuffer = document.getElementById(boxId).value.trim();
+
+            try {
+                appState.isListening = true;
+                appState.recognition.start();
+            } catch (e) {}
+        }
+
+        function stopSpeechRecognition() {
+            appState.isListening = false;
+            clearTimeout(appState.falterTimeout);
+            if (appState.recognition) {
+                try {
+                    appState.recognition.stop();
+                } catch (e) {}
+            }
+            updateMicVisualState(false);
+        }
+
+        function updateMicVisualState(listening) {
+            // Update Recitation Mic UI
+            const rBtn = document.getElementById('btn-recite-mic');
+            const rIcon = document.getElementById('recite-mic-icon');
+            const rText = document.getElementById('recite-mic-text');
+            const rRing = document.getElementById('recite-pulse-ring');
+            const rBar = document.getElementById('recite-status-bar');
+
+            // Update QA Mic UI
+            const qBtn = document.getElementById('btn-qa-mic');
+            const qIcon = document.getElementById('qa-mic-icon');
+            const qText = document.getElementById('qa-mic-text');
+            const qRing = document.getElementById('qa-pulse-ring');
+            const qBar = document.getElementById('qa-status-bar');
+
+            if (listening && appState.activeMicTarget === 'recitation') {
+                rBtn.classList.replace('bg-ffa-navy', 'bg-rose-600');
+                rBtn.classList.replace('hover:bg-ffa-navyLight', 'hover:bg-rose-700');
+                rIcon.className = 'fa-solid fa-stop text-base';
+                rText.textContent = 'Stop Reciting';
+                rRing.classList.remove('hidden');
+                rBar.classList.remove('hidden');
+                rBar.classList.add('flex');
+            } else {
+                rBtn.classList.replace('bg-rose-600', 'bg-ffa-navy');
+                rBtn.classList.replace('hover:bg-rose-700', 'hover:bg-ffa-navyLight');
+                rIcon.className = 'fa-solid fa-microphone text-base';
+                rText.textContent = 'Start Reciting Creed';
+                rRing.classList.add('hidden');
+                rBar.classList.add('hidden');
+                rBar.classList.remove('flex');
+            }
+
+            if (listening && appState.activeMicTarget === 'qa') {
+                qBtn.classList.replace('bg-ffa-navy', 'bg-rose-600');
+                qBtn.classList.replace('hover:bg-ffa-navyLight', 'hover:bg-rose-700');
+                qIcon.className = 'fa-solid fa-stop text-base';
+                qText.textContent = 'Stop Recording';
+                qRing.classList.remove('hidden');
+                qBar.classList.remove('hidden');
+                qBar.classList.add('flex');
+            } else {
+                qBtn.classList.replace('bg-rose-600', 'bg-ffa-navy');
+                qBtn.classList.replace('hover:bg-rose-700', 'hover:bg-ffa-navyLight');
+                qIcon.className = 'fa-solid fa-microphone text-base';
+                qText.textContent = 'Start Speaking Answer';
+                qRing.classList.add('hidden');
+                qBar.classList.add('hidden');
+                qBar.classList.remove('flex');
+            }
+        }
+
+        // Official California FFA 10-Second Prompter Rule
+        function reset10SecondFalterTimer() {
+            clearTimeout(appState.falterTimeout);
+            document.getElementById('falter-alert-banner').classList.add('hidden');
+
+            if (appState.isListening && appState.activeMicTarget === 'recitation') {
+                appState.falterTimeout = setTimeout(() => {
+                    document.getElementById('falter-alert-banner').classList.remove('hidden');
+                }, 10000); // 10 seconds exact rule
+            }
+        }
+
+        function triggerJudgePrompt() {
+            const currentText = document.getElementById('recitation-transcript').value.trim();
+            const spokenTokens = normalizeWords(currentText);
+            const officialTokens = normalizeWords(OFFICIAL_CREED_SCRIPT);
+            const officialDisplayWords = OFFICIAL_CREED_SCRIPT.split(/\s+/);
+
+            // Estimate where the student currently is in the script
+            let nextIndex = Math.min(spokenTokens.length, officialDisplayWords.length - 1);
+            if (spokenTokens.length === 0) {
+                nextIndex = 0;
+            }
+
+            const nextPhrase = officialDisplayWords.slice(nextIndex, nextIndex + 5).join(' ');
+            appState.promptsUsed++;
+            document.getElementById('prompts-used-count').textContent = appState.promptsUsed;
+            document.getElementById('falter-alert-banner').classList.add('hidden');
+
+            const hintBox = document.getElementById('prompter-hint-box');
+            const hintText = document.getElementById('prompter-hint-text');
+            hintText.textContent = `"...${nextPhrase}..."`;
+            hintBox.classList.remove('hidden');
+
+            if (appState.ttsEnabled) {
+                speakTextWithGeminiOrBrowser(nextPhrase, 0, false);
+            }
+        }
+
+        function toggleScriptPeek() {
+            const drawer = document.getElementById('script-peek-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function clearRecitationTranscript() {
+            appState.finalTranscriptBuffer = '';
+            document.getElementById('recitation-transcript').value = '';
+            document.getElementById('recite-interim-badge').textContent = '';
+            updateRecitationWordCount();
+        }
+
+        function updateRecitationWordCount() {
+            const text = document.getElementById('recitation-transcript').value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            document.getElementById('recite-word-count').textContent = words;
+        }
+
+        function clearQATranscript() {
+            appState.finalTranscriptBuffer = '';
+            document.getElementById('qa-answer-transcript').value = '';
+            document.getElementById('qa-interim-badge').textContent = '';
+            updateQAWordCount();
+        }
+
+        function updateQAWordCount() {
+            const text = document.getElementById('qa-answer-transcript').value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            document.getElementById('qa-word-count').textContent = words;
+        }
+
+        // -------------------------------------------------------------------------
+        // 6. JUDGE TEXT-TO-SPEECH (GEMINI TTS + WEB SPEECH FALLBACK)
+        // -------------------------------------------------------------------------
+        function stopAllJudgeAudio() {
+            if (appState.currentAudioElement) {
+                appState.currentAudioElement.pause();
+                appState.currentAudioElement = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            setJudgeSpeakingVisuals(false);
+        }
+
+        function setJudgeSpeakingVisuals(speaking, judgeIndex = 0) {
+            const indicator = document.getElementById('judge-speaking-indicator');
+            const cards = document.querySelectorAll('.judge-card');
+
+            cards.forEach(card => {
+                card.classList.remove('border-ffa-gold', 'bg-white/20', 'shadow-lg');
+                card.classList.add('border-transparent', 'bg-white/10');
+            });
+
+            if (speaking && indicator) {
+                indicator.classList.remove('hidden');
+                indicator.classList.add('flex');
+                if (cards[judgeIndex]) {
+                    cards[judgeIndex].classList.remove('border-transparent', 'bg-white/10');
+                    cards[judgeIndex].classList.add('border-ffa-gold', 'bg-white/20', 'shadow-lg');
+                }
+            } else if (indicator) {
+                indicator.classList.add('hidden');
+                indicator.classList.remove('flex');
+                if (cards[judgeIndex]) {
+                    cards[judgeIndex].classList.remove('border-transparent');
+                    cards[judgeIndex].classList.add('border-ffa-gold/50');
+                }
+            }
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+            const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+
+            writeStr(0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.length * 2, true);
+            writeStr(8, 'WAVE');
+            writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeStr(36, 'data');
+            view.setUint32(40, pcm16.length * 2, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        async function speakTextWithGeminiOrBrowser(text, judgeIndex = 0, triggerAutoListenAfter = true) {
+            stopAllJudgeAudio();
+            if (!appState.ttsEnabled) return;
+
+            setJudgeSpeakingVisuals(true, judgeIndex);
+
+            const onFinished = () => {
+                setJudgeSpeakingVisuals(false, judgeIndex);
+                if (triggerAutoListenAfter && appState.autoListen && appState.sttEnabled && !appState.isListening) {
+                    startSpeechRecognition('qa');
+                }
+            };
+
+            const judgeVoices = ['Charon', 'Kore', 'Puck'];
+            const selectedVoice = judgeVoices[judgeIndex % judgeVoices.length];
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `Say in a warm, encouraging California FFA judge tone: ${text}` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: selectedVoice }
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 1);
+
+                if (response && response.ok) {
+                    const result = await response.json();
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+
+                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                        const rateMatch = mimeType.match(/rate=(\d+)/);
+                        const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                        const pcm16 = new Int16Array(base64ToArrayBuffer(audioData));
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        const audioUrl = URL.createObjectURL(wavBlob);
+
+                        const audio = new Audio(audioUrl);
+                        appState.currentAudioElement = audio;
+                        audio.onended = () => {
+                            URL.revokeObjectURL(audioUrl);
+                            onFinished();
+                        };
+                        audio.onerror = () => fallbackBrowserTTS(text, judgeIndex, onFinished);
+                        await audio.play();
+                        return;
+                    }
+                }
+            } catch (err) {}
+
+            fallbackBrowserTTS(text, judgeIndex, onFinished);
+        }
+
+        function fallbackBrowserTTS(text, judgeIndex, onFinishedCallback) {
+            if (!('speechSynthesis' in window)) {
+                setJudgeSpeakingVisuals(false, judgeIndex);
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.96;
+            utterance.pitch = judgeIndex === 0 ? 0.92 : (judgeIndex === 1 ? 1.05 : 1.0);
+            utterance.onend = onFinishedCallback;
+            utterance.onerror = onFinishedCallback;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function replayCurrentQuestion() {
+            const q = appState.qaQuestions[appState.currentQAIndex];
+            if (q) {
+                speakTextWithGeminiOrBrowser(q.question, appState.currentQAIndex, false);
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // 7. GEMINI API HELPER WITH EXPONENTIAL BACKOFF
+        // -------------------------------------------------------------------------
+        async function fetchWithBackoff(url, options, maxRetries = 3) {
+            let delay = 1000;
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return response;
+                    if (response.status === 429 || response.status >= 500) {
+                        if (attempt === maxRetries) return response;
+                    } else {
+                        return response;
+                    }
+                } catch (err) {
+                    if (attempt === maxRetries) throw err;
+                }
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+            return null;
+        }
+
+        async function selectThreeCreedQuestions(source) {
+            if (source === 'ai') {
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                    const prompt = `You are the California FFA State Creed Contest Supervisor writing 3 official single-part questions for 7th-9th grade Greenhand FFA members.
+Rules:
+- Exactly 3 questions.
+- Questions containing two or more parts MUST be avoided (each must be a single, clear question).
+- Each question must pertain directly to the contents of E.M. Tiffany's FFA Creed.
+Return a JSON array of 3 objects with fields: "paragraph" (integer 1-5), "theme" (short string), and "question" (string).`;
+
+                    const payload = {
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        paragraph: { type: "INTEGER" },
+                                        theme: { type: "STRING" },
+                                        question: { type: "STRING" }
+                                    },
+                                    required: ["paragraph", "theme", "question"]
+                                }
+                            }
+                        }
+                    };
+
+                    const response = await fetchWithBackoff(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 2);
+
+                    if (response && response.ok) {
+                        const data = await response.json();
+                        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed) && parsed.length >= 3) {
+                                return parsed.slice(0, 3);
+                            }
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            // Pick 3 distinct questions from the 30-Question Curated Bank across different paragraphs
+            const shuffled = [...CREED_QUESTION_BANK].sort(() => Math.random() - 0.5);
+            const picked = [];
+            const usedParagraphs = new Set();
+
+            for (const item of shuffled) {
+                if (!usedParagraphs.has(item.paragraph)) {
+                    picked.push(item);
+                    usedParagraphs.add(item.paragraph);
+                    if (picked.length === 3) break;
+                }
+            }
+            return picked;
+        }
+
+        // -------------------------------------------------------------------------
+        // 8. SIMULATION FLOW CONTROL (RECITATION -> Q&A -> SCORING)
+        // -------------------------------------------------------------------------
+        async function startCreedSimulation() {
+            const btn = document.getElementById('btn-start-sim');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Preparing Contest Room...</span>`;
+
+            appState.studentName = document.getElementById('student-name').value.trim();
+            appState.studentChapter = document.getElementById('student-chapter').value.trim();
+            appState.practiceMode = document.querySelector('input[name="practice-mode"]:checked').value;
+            appState.questionSource = document.getElementById('question-source-select').value;
+            appState.ttsEnabled = document.getElementById('toggle-tts').checked;
+            appState.sttEnabled = document.getElementById('toggle-stt').checked;
+            appState.autoListen = document.getElementById('toggle-autolisten').checked;
+
+            // Reset metrics
+            appState.recitationTranscript = '';
+            appState.recitationSeconds = 0;
+            appState.promptsUsed = 0;
+            appState.recitationAccuracyResult = null;
+            appState.qaResponses = [];
+            appState.currentQAIndex = 0;
+            appState.qaSecondsRemaining = 300; // 5:00 official limit
+            appState.qaOvertimeSeconds = 0;
+
+            appState.qaQuestions = await selectThreeCreedQuestions(appState.questionSource);
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-play text-lg"></i> <span>Begin Creed Simulation</span>`;
+
+            document.getElementById('btn-header-reset').classList.remove('hidden');
+
+            if (appState.practiceMode === 'qa_only') {
+                enterQAStage();
+            } else {
+                enterRecitationStage();
+            }
+        }
+
+        function enterRecitationStage() {
+            switchScreen('screen-recitation');
+            clearRecitationTranscript();
+            document.getElementById('prompts-used-count').textContent = '0';
+            document.getElementById('prompter-hint-box').classList.add('hidden');
+            document.getElementById('falter-alert-banner').classList.add('hidden');
+            document.getElementById('script-peek-drawer').classList.add('hidden');
+
+            const finishLabel = document.getElementById('finish-recite-label');
+            finishLabel.textContent = appState.practiceMode === 'recitation_only'
+                ? 'Complete Recitation & View Accuracy Score'
+                : 'Complete Recitation & Begin 3 Judges\' Questions';
+
+            // Hide 5-minute Q&A countdown badge during recitation
+            document.getElementById('header-timer-badge').classList.add('hidden');
+            document.getElementById('header-timer-badge').classList.remove('flex');
+
+            // Start Recitation Elapsed Timer
+            clearInterval(appState.recitationTimerInterval);
+            appState.recitationSeconds = 0;
+            document.getElementById('recitation-elapsed').textContent = '0:00';
+            appState.recitationTimerInterval = setInterval(() => {
+                appState.recitationSeconds++;
+                const m = Math.floor(appState.recitationSeconds / 60);
+                const s = appState.recitationSeconds % 60;
+                document.getElementById('recitation-elapsed').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function completeRecitationStage() {
+            stopSpeechRecognition();
+            stopAllJudgeAudio();
+            clearInterval(appState.recitationTimerInterval);
+
+            const spoken = document.getElementById('recitation-transcript').value.trim();
+            appState.recitationTranscript = spoken;
+            appState.recitationAccuracyResult = evaluateCreedAccuracy(OFFICIAL_CREED_SCRIPT, spoken);
+
+            if (appState.practiceMode === 'recitation_only') {
+                finishAndEvaluateAll();
+            } else {
+                enterQAStage();
+            }
+        }
+
+        function enterQAStage() {
+            switchScreen('screen-qa');
+
+            // Show official 5:00 Question Time countdown in header
+            const timerBadge = document.getElementById('header-timer-badge');
+            timerBadge.classList.remove('hidden');
+            timerBadge.classList.add('flex');
+            startQACountdownClock();
+
+            loadQAQuestion(0);
+        }
+
+        function startQACountdownClock() {
+            clearInterval(appState.qaContestTimerInterval);
+            appState.qaSecondsRemaining = 300;
+            appState.qaOvertimeSeconds = 0;
+            updateQAClockDisplay();
+
+            appState.qaContestTimerInterval = setInterval(() => {
+                if (appState.qaSecondsRemaining > 0) {
+                    appState.qaSecondsRemaining--;
+                    if (appState.qaSecondsRemaining === 60) {
+                        showToast("1 minute remaining on the 5-minute California FFA Question Time clock.", "warning");
+                    }
+                } else {
+                    appState.qaOvertimeSeconds++;
+                    if (appState.qaOvertimeSeconds === 1) {
+                        showToast("5-minute limit exceeded! Official rule deducts -1 point per second over.", "error");
+                    }
+                }
+                updateQAClockDisplay();
+            }, 1000);
+        }
+
+        function updateQAClockDisplay() {
+            const label = document.getElementById('header-timer-label');
+            const display = document.getElementById('header-countdown');
+
+            if (appState.qaSecondsRemaining > 0) {
+                label.textContent = 'Question Time:';
+                const m = Math.floor(appState.qaSecondsRemaining / 60);
+                const s = appState.qaSecondsRemaining % 60;
+                display.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+                display.className = appState.qaSecondsRemaining <= 60
+                    ? 'font-mono font-bold text-sm text-amber-300'
+                    : 'font-mono font-bold text-sm text-white';
+            } else {
+                label.textContent = 'OVERTIME (-1 pt/s):';
+                display.textContent = `+${appState.qaOvertimeSeconds}s`;
+                display.className = 'font-mono font-bold text-sm text-rose-400 animate-pulse';
+            }
+        }
+
+        function loadQAQuestion(index) {
+            stopSpeechRecognition();
+            stopAllJudgeAudio();
+
+            const qObj = appState.qaQuestions[index];
+            document.getElementById('qa-current-num').textContent = index + 1;
+            document.getElementById('qa-paragraph-badge').textContent = `Paragraph ${qObj.paragraph}: ${qObj.theme}`;
+            document.getElementById('qa-progress-bar').style.width = `${((index + 1) / 3) * 100}%`;
+
+            const judgeNames = [
+                'Mr. Caleb Henderson (Ag Educator)',
+                'Mrs. Elena Morales (Agribusiness Leader)',
+                'Jordan Taylor (Past State FFA Officer)'
+            ];
+            document.getElementById('active-judge-label').innerHTML = `<i class="fa-solid fa-comment-dots text-ffa-gold"></i> ${judgeNames[index]} Asks:`;
+
+            let spokenQuestion = qObj.question;
+            if (index === 0 && appState.studentName) {
+                spokenQuestion = `Thank you, ${appState.studentName}. Here is your first question: ${qObj.question}`;
+            }
+
+            document.getElementById('current-qa-question-text').textContent = spokenQuestion;
+            clearQATranscript();
+
+            document.getElementById('qa-submit-label').textContent = index === 2
+                ? 'Finish Q&A & View Official 100-Point Scorecard'
+                : 'Submit Answer & Next Question';
+
+            // Start per-question elapsed timer
+            clearInterval(appState.qaQuestionTimerInterval);
+            appState.qaCurrentElapsed = 0;
+            document.getElementById('qa-question-elapsed').textContent = '0:00';
+            appState.qaQuestionTimerInterval = setInterval(() => {
+                appState.qaCurrentElapsed++;
+                const m = Math.floor(appState.qaCurrentElapsed / 60);
+                const s = appState.qaCurrentElapsed % 60;
+                document.getElementById('qa-question-elapsed').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+
+            speakTextWithGeminiOrBrowser(spokenQuestion, index, true);
+        }
+
+        function countFillerWords(text) {
+            if (!text) return { total: 0, breakdown: {} };
+            const lower = text.toLowerCase();
+            const patterns = [
+                { label: 'um', regex: /\bum+\b/g },
+                { label: 'uh', regex: /\buh+\b/g },
+                { label: 'like', regex: /\blike\b/g },
+                { label: 'you know', regex: /\byou know\b/g },
+                { label: 'basically', regex: /\bbasically\b/g },
+                { label: 'kind of / sort of', regex: /\b(kind of|sort of)\b/g }
+            ];
+            let total = 0;
+            const breakdown = {};
+            patterns.forEach(p => {
+                const matches = lower.match(p.regex);
+                if (matches && matches.length > 0) {
+                    breakdown[p.label] = matches.length;
+                    total += matches.length;
+                }
+            });
+            return { total, breakdown };
+        }
+
+        function submitQAAnswerAndNext() {
+            stopSpeechRecognition();
+            stopAllJudgeAudio();
+            clearInterval(appState.qaQuestionTimerInterval);
+
+            const raw = document.getElementById('qa-answer-transcript').value.trim();
+            const qObj = appState.qaQuestions[appState.currentQAIndex];
+            const words = raw ? raw.split(/\s+/).length : 0;
+            const fillers = countFillerWords(raw);
+
+            appState.qaResponses.push({
+                paragraph: qObj.paragraph,
+                theme: qObj.theme,
+                question: qObj.question,
+                answerText: raw || '[No verbal or written response provided.]',
+                isBlank: !raw,
+                durationSec: appState.qaCurrentElapsed,
+                wordCount: words,
+                fillerCount: fillers.total,
+                fillerBreakdown: fillers.breakdown
+            });
+
+            if (appState.currentQAIndex < 2) {
+                appState.currentQAIndex++;
+                loadQAQuestion(appState.currentQAIndex);
+            } else {
+                finishAndEvaluateAll();
+            }
+        }
+
+        function confirmEndQAEarly() {
+            openCustomModal(
+                "Finish Q&A Round Early?",
+                "Your completed responses will be graded on the official California FFA 100-point rubric.",
+                () => {
+                    const raw = document.getElementById('qa-answer-transcript').value.trim();
+                    if (raw) {
+                        const qObj = appState.qaQuestions[appState.currentQAIndex];
+                        const fillers = countFillerWords(raw);
+                        appState.qaResponses.push({
+                            paragraph: qObj.paragraph,
+                            theme: qObj.theme,
+                            question: qObj.question,
+                            answerText: raw,
+                            isBlank: false,
+                            durationSec: appState.qaCurrentElapsed,
+                            wordCount: raw.split(/\s+/).length,
+                            fillerCount: fillers.total,
+                            fillerBreakdown: fillers.breakdown
+                        });
+                    }
+                    finishAndEvaluateAll();
+                }
+            );
+        }
+
+        function confirmReturnToSetup() {
+            openCustomModal(
+                "Exit Current Practice Session?",
+                "Are you sure you want to return to the setup screen? Current progress will not be saved.",
+                () => returnToSetupDirect()
+            );
+        }
+
+        function returnToSetupDirect() {
+            stopSpeechRecognition();
+            stopAllJudgeAudio();
+            clearInterval(appState.recitationTimerInterval);
+            clearInterval(appState.qaContestTimerInterval);
+            clearInterval(appState.qaQuestionTimerInterval);
+
+            document.getElementById('header-timer-badge').classList.add('hidden');
+            document.getElementById('header-timer-badge').classList.remove('flex');
+            document.getElementById('btn-header-reset').classList.add('hidden');
+
+            switchScreen('screen-setup');
+        }
+
+        // -------------------------------------------------------------------------
+        // 9. WORD-FOR-WORD RECITATION DIFF ACCURACY ENGINE (-2 PTS PER ERROR)
+        // -------------------------------------------------------------------------
+        function normalizeWords(str) {
+            if (!str) return [];
+            return str
+                .toLowerCase()
+                .replace(/e\.m\./g, 'em')
+                .replace(/[–—-]/g, ' ')
+                .replace(/[^a-z0-9'\s]/g, '')
+                .split(/\s+/)
+                .filter(Boolean);
+        }
+
+        function evaluateCreedAccuracy(officialText, spokenText) {
+            const refDisplayWords = officialText.split(/\s+/);
+            const refNorm = refDisplayWords.map(w =>
+                w.toLowerCase().replace(/e\.m\./g, 'em').replace(/[^a-z0-9']/g, '')
+            );
+            const hypNorm = normalizeWords(spokenText);
+
+            if (hypNorm.length === 0) {
+                return {
+                    errorCount: refNorm.length,
+                    deduction: refNorm.length * 2,
+                    diffHtml: `<span class="text-rose-700 font-semibold italic">No spoken or typed recitation text was captured. Click "Start Reciting Creed" and speak into your microphone to test word-for-word accuracy.</span>`
+                };
+            }
+
+            // Dynamic Programming Longest Common Subsequence (LCS) alignment for exact word diff
+            const m = refNorm.length;
+            const n = hypNorm.length;
+            const dp = Array.from({ length: m + 1 }, () => new Uint16Array(n + 1));
+
+            for (let i = m - 1; i >= 0; i--) {
+                for (let j = n - 1; j >= 0; j--) {
+                    if (refNorm[i] === hypNorm[j]) {
+                        dp[i][j] = 1 + dp[i + 1][j + 1];
+                    } else {
+                        dp[i][j] = Math.max(dp[i + 1][j], dp[i][j + 1]);
+                    }
+                }
+            }
+
+            let i = 0, j = 0;
+            let errors = 0;
+            const tokensHtml = [];
+
+            while (i < m && j < n) {
+                if (refNorm[i] === hypNorm[j]) {
+                    tokensHtml.push(`<span class="text-emerald-800 bg-emerald-50 px-1 rounded">${escapeHtml(refDisplayWords[i])}</span>`);
+                    i++;
+                    j++;
+                } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+                    // Missed word from official script
+                    errors++;
+                    tokensHtml.push(`<span class="text-rose-700 bg-rose-100 line-through px-1 rounded font-semibold" title="Missed word (-2 pts)">${escapeHtml(refDisplayWords[i])}</span>`);
+                    i++;
+                } else {
+                    // Extra or switched word spoken by student
+                    errors++;
+                    tokensHtml.push(`<span class="text-amber-900 bg-amber-200 px-1 rounded font-semibold" title="Added/switched word (-2 pts)">+${escapeHtml(hypNorm[j])}</span>`);
+                    j++;
+                }
+            }
+
+            while (i < m) {
+                errors++;
+                tokensHtml.push(`<span class="text-rose-700 bg-rose-100 line-through px-1 rounded font-semibold" title="Missed word (-2 pts)">${escapeHtml(refDisplayWords[i])}</span>`);
+                i++;
+            }
+
+            while (j < n) {
+                errors++;
+                tokensHtml.push(`<span class="text-amber-900 bg-amber-200 px-1 rounded font-semibold" title="Extra word (-2 pts)">+${escapeHtml(hypNorm[j])}</span>`);
+                j++;
+            }
+
+            return {
+                errorCount: errors,
+                deduction: errors * 2,
+                diffHtml: tokensHtml.join(' ')
+            };
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // -------------------------------------------------------------------------
+        // 10. END-OF-ROUND 100-POINT RUBRIC EVALUATION (GEMINI 2.5 FLASH)
+        // -------------------------------------------------------------------------
+        async function finishAndEvaluateAll() {
+            stopSpeechRecognition();
+            stopAllJudgeAudio();
+            clearInterval(appState.recitationTimerInterval);
+            clearInterval(appState.qaContestTimerInterval);
+            clearInterval(appState.qaQuestionTimerInterval);
+
+            document.getElementById('header-timer-badge').classList.add('hidden');
+            document.getElementById('header-timer-badge').classList.remove('flex');
+
+            switchScreen('screen-evaluating');
+
+            const evaluation = await generateCreedRubricEvaluation();
+            renderCreedScorecard(evaluation);
+            switchScreen('screen-results');
+        }
+
+        async function generateCreedRubricEvaluation() {
+            const hasRecitation = appState.practiceMode !== 'qa_only';
+            const hasQA = appState.practiceMode !== 'recitation_only' && appState.qaResponses.length > 0;
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+                const qaTranscriptBlock = hasQA
+                    ? appState.qaResponses.map((r, i) =>
+                        `Q${i + 1} (Paragraph ${r.paragraph} - ${r.theme}): "${r.question}"\nStudent Spoken Answer (${r.wordCount} words, ${r.fillerCount} fillers, ${r.durationSec}s): "${r.answerText}"`
+                    ).join('\n\n')
+                    : "Q&A Round was skipped in Recitation-Only Drill mode.";
+
+                const recitationBlock = hasRecitation
+                    ? `Recitation Duration: ${appState.recitationSeconds} seconds. Word Errors Detected: ${appState.recitationAccuracyResult?.errorCount || 0}. Captured Recitation: "${appState.recitationTranscript || '[None]'}"`
+                    : "Recitation was skipped in Q&A-Only mode.";
+
+                const systemPrompt = `You are an official California Association FFA Creed Speaking LDE Judge evaluating a 7th-9th grade Greenhand FFA member on the official 100-point California FFA Creed Rubric:
+1. Oral Communication (30 pts max):
+   - paceRaw (0-5, multiplied by 2 = 10 pts): Speaks articulately at a rate that engages the audience.
+   - toneRaw (0-5, multiplied by 2 = 10 pts): Voice is upbeat, impassioned, and under control.
+   - volumeRaw (0-5, multiplied by 2 = 10 pts): Clear, audible voice.
+2. Question & Answer (40 pts max):
+   - qaResponseRaw (0-5, multiplied by 2 = 10 pts): Organized thoughts and concise answers.
+   - qaSupportRaw (0-5, multiplied by 3 = 15 pts): Provides specific details supporting answers and the basis of the question.
+   - qaKnowledgeRaw (0-5, multiplied by 3 = 15 pts): Demonstrates genuine knowledge of agriculture and FFA.
+
+Provide encouraging, specific coaching tailored to a 7th–9th grade Greenhand FFA competitor, and write an inspiring, authentic State-Winning Greenhand Model Answer (3–5 sentences) for each question asked.`;
+
+                const userPrompt = `Evaluate this California FFA Creed Speaking contestant:
+Contestant: ${appState.studentName || 'Greenhand FFA Member'} (${appState.studentChapter || 'California FFA'})
+Practice Mode: ${appState.practiceMode}
+
+${recitationBlock}
+
+${qaTranscriptBlock}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                paceRaw: { type: "INTEGER" },
+                                toneRaw: { type: "INTEGER" },
+                                volumeRaw: { type: "INTEGER" },
+                                oralFeedback: { type: "STRING" },
+                                qaResponseRaw: { type: "INTEGER" },
+                                qaSupportRaw: { type: "INTEGER" },
+                                qaKnowledgeRaw: { type: "INTEGER" },
+                                qaFeedback: { type: "STRING" },
+                                overallSummary: { type: "STRING" },
+                                questionReviews: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            strengths: { type: "STRING" },
+                                            improvements: { type: "STRING" },
+                                            modelAnswer: { type: "STRING" }
+                                        },
+                                        required: ["strengths", "improvements", "modelAnswer"]
+                                    }
+                                }
+                            },
+                            required: [
+                                "paceRaw", "toneRaw", "volumeRaw", "oralFeedback",
+                                "qaResponseRaw", "qaSupportRaw", "qaKnowledgeRaw", "qaFeedback",
+                                "overallSummary", "questionReviews"
+                            ]
+                        }
+                    }
+                };
+
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 2);
+
+                if (response && response.ok) {
+                    const data = await response.json();
+                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) {
+                        return JSON.parse(text);
+                    }
+                }
+            } catch (err) {}
+
+            // Deterministic heuristic fallback if API is offline
+            return buildFallbackCreedEvaluation(hasRecitation, hasQA);
+        }
+
+        function buildFallbackCreedEvaluation(hasRecitation, hasQA) {
+            const answeredQA = appState.qaResponses.filter(r => !r.isBlank).length;
+            const avgWords = hasQA
+                ? appState.qaResponses.reduce((a, b) => a + b.wordCount, 0) / appState.qaResponses.length
+                : 50;
+
+            return {
+                paceRaw: 4,
+                toneRaw: 4,
+                volumeRaw: 4,
+                oralFeedback: "Strong vocal foundation! Focus on pausing naturally at semicolons and periods in E.M. Tiffany's Creed so every phrase resonates with conviction.",
+                qaResponseRaw: hasQA ? (answeredQA === 3 ? 4 : 3) : 4,
+                qaSupportRaw: hasQA ? (avgWords >= 35 ? 4 : 3) : 4,
+                qaKnowledgeRaw: hasQA ? (avgWords >= 35 ? 4 : 3) : 4,
+                qaFeedback: "You addressed the judges' questions directly. To push your Q&A score into the 36–40 point range, connect every answer to a specific example from California agriculture, your ag class, or your Supervised Agricultural Experience (SAE).",
+                overallSummary: "Great work practicing with the California FFA Creed Simulator! Review your word-by-word accuracy audit and model Greenhand responses below to sharpen your delivery for sectional and regional competition.",
+                questionReviews: appState.qaResponses.map(r => ({
+                    strengths: r.isBlank ? "Participated in the timed panel round." : "Answered the question clearly and stayed focused on the Creed's message.",
+                    improvements: r.isBlank ? "Be sure to speak a complete 3–4 sentence response." : "Include a concrete example from modern California agriculture or your Greenhand FFA experience.",
+                    modelAnswer: `Thank you for that question. In Paragraph ${r.paragraph} of the FFA Creed, E.M. Tiffany reminds us about ${r.theme.toLowerCase()}. As a Greenhand FFA member, I see this every day in my agriculture class and SAE project—where hard work, scientific innovation, and community leadership come together to feed and clothe our growing population.`
+                }))
+            };
+        }
+
+        function renderCreedScorecard(evalData) {
+            const hasRecitation = appState.practiceMode !== 'qa_only';
+            const hasQA = appState.practiceMode !== 'recitation_only' && appState.qaResponses.length > 0;
+
+            // Clamp raw 0-5 rubric scores
+            const paceRaw = Math.min(5, Math.max(0, evalData.paceRaw ?? 4));
+            const toneRaw = Math.min(5, Math.max(0, evalData.toneRaw ?? 4));
+            const volRaw = Math.min(5, Math.max(0, evalData.volumeRaw ?? 4));
+            const oralTotal = (paceRaw * 2) + (toneRaw * 2) + (volRaw * 2);
+
+            const qaRespRaw = hasQA ? Math.min(5, Math.max(0, evalData.qaResponseRaw ?? 4)) : 4;
+            const qaSuppRaw = hasQA ? Math.min(5, Math.max(0, evalData.qaSupportRaw ?? 4)) : 4;
+            const qaKnowRaw = hasQA ? Math.min(5, Math.max(0, evalData.qaKnowledgeRaw ?? 4)) : 4;
+            const qaTotal = (qaRespRaw * 2) + (qaSuppRaw * 3) + (qaKnowRaw * 3);
+
+            const errorCount = hasRecitation && appState.recitationAccuracyResult
+                ? appState.recitationAccuracyResult.errorCount
+                : 0;
+            const accuracyDeduction = hasRecitation && appState.recitationAccuracyResult
+                ? appState.recitationAccuracyResult.deduction
+                : 0;
+            const timeDeduction = hasQA ? appState.qaOvertimeSeconds : 0; // -1 pt per second over 5:00
+
+            appState.baseScores = {
+                oralTotal,
+                qaTotal,
+                accuracyDeduction,
+                timeDeduction
+            };
+
+            // Populate Header Info
+            const nameStr = appState.studentName || 'California FFA Greenhand';
+            const chapStr = appState.studentChapter ? ` — ${appState.studentChapter}` : '';
+            document.getElementById('res-student-name').textContent = nameStr + chapStr;
+            document.getElementById('res-overall-feedback').textContent = evalData.overallSummary;
+
+            const modeLabels = {
+                full: 'Full Contest Mode (Creed Recitation + 3 Judges\' Questions)',
+                recitation_only: 'Recitation Accuracy Drill Mode (Q&A Baseline Applied)',
+                qa_only: '3-Question Judges\' Panel Mode (Recitation Accuracy Baseline Applied)'
+            };
+            document.getElementById('res-mode-subtitle').textContent = modeLabels[appState.practiceMode];
+
+            // Populate Oral Communication (30 pts)
+            document.getElementById('res-pace-pts').textContent = paceRaw * 2;
+            document.getElementById('res-tone-pts').textContent = toneRaw * 2;
+            document.getElementById('res-volume-pts').textContent = volRaw * 2;
+            document.getElementById('res-oral-total').textContent = oralTotal;
+            document.getElementById('res-oral-feedback').textContent = evalData.oralFeedback;
+
+            // Populate Q&A (40 pts)
+            document.getElementById('res-qa-resp-pts').textContent = qaRespRaw * 2;
+            document.getElementById('res-qa-supp-pts').textContent = qaSuppRaw * 3;
+            document.getElementById('res-qa-know-pts').textContent = qaKnowRaw * 3;
+            document.getElementById('res-qa-total').textContent = qaTotal;
+            document.getElementById('res-qa-feedback').textContent = evalData.qaFeedback;
+
+            // Deductions display
+            document.getElementById('res-error-count').textContent = errorCount;
+            document.getElementById('res-accuracy-deduction').textContent = accuracyDeduction;
+            document.getElementById('res-time-deduction').textContent = timeDeduction;
+
+            // Recalculate Non-Verbal + Net Total
+            recalculateNonVerbalScore();
+
+            // Render Recitation Audit Card
+            const auditCard = document.getElementById('recitation-audit-card');
+            if (hasRecitation && appState.recitationAccuracyResult) {
+                auditCard.classList.remove('hidden');
+                const rSec = appState.recitationSeconds;
+                const m = Math.floor(rSec / 60);
+                const s = rSec % 60;
+                document.getElementById('audit-time').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+
+                const spokenWords = appState.recitationTranscript ? appState.recitationTranscript.split(/\s+/).length : 0;
+                const wpm = rSec > 0 ? Math.round((spokenWords / rSec) * 60) : 0;
+                document.getElementById('audit-wpm').textContent = `${wpm} WPM`;
+                document.getElementById('audit-errors').textContent = errorCount;
+                document.getElementById('audit-deduction').textContent = `-${accuracyDeduction} pts`;
+                document.getElementById('recitation-diff-output').innerHTML = appState.recitationAccuracyResult.diffHtml;
+            } else {
+                auditCard.classList.add('hidden');
+            }
+
+            // Render Q&A Breakdown Card
+            const qaCard = document.getElementById('qa-coaching-card');
+            if (hasQA) {
+                qaCard.classList.remove('hidden');
+                const usedSec = (300 - appState.qaSecondsRemaining) + appState.qaOvertimeSeconds;
+                const qm = Math.floor(usedSec / 60);
+                const qs = usedSec % 60;
+                document.getElementById('res-qa-total-time').textContent = `${qm}:${qs.toString().padStart(2, '0')}`;
+
+                const listEl = document.getElementById('qa-breakdown-list');
+                listEl.innerHTML = appState.qaResponses.map((resp, idx) => {
+                    const rev = (evalData.questionReviews && evalData.questionReviews[idx]) || {
+                        strengths: "Clear effort to answer the judge's question.",
+                        improvements: "Add more specific agricultural examples.",
+                        modelAnswer: "Connect your answer directly to the Creed and your FFA experience."
+                    };
+
+                    return `
+                        <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50">
+                            <div class="bg-slate-100 px-5 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-ffa-navy text-white text-xs font-extrabold px-2.5 py-1 rounded">Q${idx + 1}</span>
+                                    <span class="text-xs font-bold text-slate-700">Paragraph ${resp.paragraph}: ${resp.theme}</span>
+                                </div>
+                                <div class="text-xs text-slate-500 flex items-center gap-3">
+                                    <span><i class="fa-regular fa-clock mr-1"></i>${resp.durationSec}s</span>
+                                    <span><i class="fa-solid fa-align-left mr-1"></i>${resp.wordCount} words</span>
+                                    <span><i class="fa-solid fa-comment-slash mr-1"></i>${resp.fillerCount} fillers</span>
+                                </div>
+                            </div>
+
+                            <div class="p-5 space-y-4">
+                                <div>
+                                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Judges' Single-Part Question</div>
+                                    <p class="font-display font-bold text-base text-slate-900">${resp.question}</p>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-xl border border-slate-200">
+                                    <div class="text-xs font-bold uppercase tracking-wider text-ffa-navy mb-1">Your Spoken Response</div>
+                                    <p class="text-sm text-slate-700 italic">"${resp.answerText}"</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4">
+                                        <div class="text-xs font-extrabold uppercase tracking-wider text-emerald-800 mb-1">
+                                            <i class="fa-solid fa-thumbs-up mr-1"></i> What You Did Well
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-emerald-950 leading-relaxed">${rev.strengths}</p>
+                                    </div>
+
+                                    <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4">
+                                        <div class="text-xs font-extrabold uppercase tracking-wider text-amber-800 mb-1">
+                                            <i class="fa-solid fa-arrow-trend-up mr-1"></i> Coaching Tip for Higher Points
+                                        </div>
+                                        <p class="text-xs sm:text-sm text-amber-950 leading-relaxed">${rev.improvements}</p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-4">
+                                    <div class="text-xs font-extrabold uppercase tracking-wider text-ffa-navy mb-1">
+                                        <i class="fa-solid fa-star text-ffa-gold mr-1"></i> State-Winning Greenhand Model Answer
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-slate-800 leading-relaxed">${rev.modelAnswer}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                qaCard.classList.add('hidden');
+            }
+        }
+
+        function recalculateNonVerbalScore() {
+            const eye = parseInt(document.getElementById('slider-eye').value, 10);
+            const gestures = parseInt(document.getElementById('slider-gestures').value, 10);
+            const poise = parseInt(document.getElementById('slider-poise').value, 10);
+
+            document.getElementById('nv-eye-val').textContent = eye;
+            document.getElementById('nv-eye-pts').textContent = eye * 2;
+            document.getElementById('nv-gestures-val').textContent = gestures;
+            document.getElementById('nv-gestures-pts').textContent = gestures * 2;
+            document.getElementById('nv-poise-val').textContent = poise;
+            document.getElementById('nv-poise-pts').textContent = poise * 2;
+
+            const nonVerbalTotal = (eye * 2) + (gestures * 2) + (poise * 2);
+            document.getElementById('res-nonverbal-total').textContent = nonVerbalTotal;
+
+            const gross = appState.baseScores.oralTotal + nonVerbalTotal + appState.baseScores.qaTotal;
+            const net = Math.max(0, gross - appState.baseScores.accuracyDeduction - appState.baseScores.timeDeduction);
+
+            document.getElementById('res-gross-score').textContent = gross;
+            document.getElementById('res-net-score').textContent = net;
+
+            const tierBadge = document.getElementById('res-tier-badge');
+            if (net >= 90) {
+                tierBadge.textContent = 'State Finals Champion Caliber (90–100)';
+                tierBadge.className = 'mt-3 inline-block text-xs font-extrabold px-3 py-1 rounded-full bg-ffa-gold text-ffa-navy';
+            } else if (net >= 80) {
+                tierBadge.textContent = 'Regional Qualifier Caliber (80–89)';
+                tierBadge.className = 'mt-3 inline-block text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-400 text-slate-900';
+            } else if (net >= 65) {
+                tierBadge.textContent = 'Sectional Contender (65–79)';
+                tierBadge.className = 'mt-3 inline-block text-xs font-extrabold px-3 py-1 rounded-full bg-blue-200 text-ffa-navy';
+            } else {
+                tierBadge.textContent = 'Developing Greenhand — Keep Practicing!';
+                tierBadge.className = 'mt-3 inline-block text-xs font-extrabold px-3 py-1 rounded-full bg-white text-ffa-navy';
+            }
+        }
+    </script>
+</body>
+</html>
